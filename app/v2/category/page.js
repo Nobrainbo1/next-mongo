@@ -1,22 +1,10 @@
 "use client";
 import { useState, useEffect } from "react";
-
 import CategoryForm from "@/app/v2/components/forms/CategoryForm";
-import Link from "next/link";
-
-import { DataGrid, GridToolbar , GridRowsProp, GridColDef } from "@mui/x-data-grid";
-
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
 import Modal from "@mui/material/Modal";
-
-import List from "@mui/material/List";
-import ListItem from "@mui/material/ListItem";
-import ListItemText from "@mui/material/ListItemText";
-import ListItemAvatar from "@mui/material/ListItemAvatar";
 import Avatar from "@mui/material/Avatar";
-import ImageIcon from "@mui/icons-material/Image";
 import WorkIcon from "@mui/icons-material/Work";
-import BeachAccessIcon from "@mui/icons-material/BeachAccess";
-
 import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 
@@ -27,8 +15,7 @@ export default function Home() {
     // { field: 'col2', headerName: 'Column 2', width: 150 },
   ];
 
-  const API_BASE = process.env.NEXT_PUBLIC_API_URL;
-  console.log(`${API_BASE}/category`);
+  const APIBASE = process.env.NEXT_PUBLIC_API_URL;
   async function fetchCategory() {
     const data = await fetch(`${APIBASE}/category`);
     const c = await data.json();
@@ -124,26 +111,96 @@ export default function Home() {
           </div>
         </div>
       </form> */}
-      <div className="mx-4">
-        <span>Category ({category.length})</span>
-        <IconButton aria-label="new-category" color="secondary" onClick={handleOpen}>
-          <AddBoxIcon />
-        </IconButton>
-        <Modal
-          open={open}
-          onClose={handleClose}
-          aria-labelledby="modal-modal-title"
-          aria-describedby="modal-modal-description"
-        >
-          <CategoryForm onSubmit={handleCategoryFormSubmit} />
-        </Modal>
-        <DataGrid
-          slots={{
-            toolbar: GridToolbar,
-          }}
-          rows={category}
-          columns={columns}
-        />
+      <div className="mx-4 p-6 bg-gray-950 min-h-screen">
+        <div className="bg-gray-900 rounded-lg shadow-2xl p-6 border border-gray-800">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-3">
+              <Avatar sx={{ bgcolor: '#3b82f6', color: 'white' }}>
+                <WorkIcon />
+              </Avatar>
+              <div>
+                <h2 className="text-2xl font-bold text-white">Categories</h2>
+                <span className="text-sm text-gray-400">({category.length} total)</span>
+              </div>
+            </div>
+            <IconButton 
+              aria-label="new-category" 
+              onClick={handleOpen}
+              sx={{ 
+                bgcolor: '#3b82f6', 
+                color: 'white', 
+                '&:hover': { bgcolor: '#2563eb' },
+                width: 48,
+                height: 48
+              }}
+            >
+              <AddBoxIcon />
+            </IconButton>
+          </div>
+          
+          <Modal
+            open={open}
+            onClose={handleClose}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <CategoryForm onSubmit={handleCategoryFormSubmit} />
+          </Modal>
+          
+          <div className="bg-gray-800 rounded-lg border border-gray-700">
+            <DataGrid
+              slots={{
+                toolbar: GridToolbar,
+              }}
+              rows={category}
+              columns={columns}
+              sx={{
+                border: 0,
+                color: 'white',
+                minHeight: 400,
+                '& .MuiDataGrid-root': {
+                  backgroundColor: '#1f2937',
+                },
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: '#374151',
+                  color: 'white',
+                  fontWeight: 700,
+                  borderBottom: '1px solid #4b5563',
+                },
+                '& .MuiDataGrid-row': {
+                  backgroundColor: '#1f2937',
+                  borderBottom: '1px solid #374151',
+                  '&:hover': {
+                    backgroundColor: '#374151',
+                  },
+                },
+                '& .MuiDataGrid-cell': {
+                  color: 'white',
+                  borderBottom: '1px solid #374151',
+                },
+                '& .MuiDataGrid-toolbarContainer': {
+                  backgroundColor: '#374151',
+                  color: 'white',
+                  borderBottom: '1px solid #4b5563',
+                  '& .MuiButton-root': {
+                    color: 'white',
+                    '&:hover': {
+                      backgroundColor: '#4b5563',
+                    }
+                  },
+                },
+                '& .MuiDataGrid-footerContainer': {
+                  backgroundColor: '#374151',
+                  color: 'white',
+                  borderTop: '1px solid #4b5563',
+                  '& .MuiTablePagination-root': {
+                    color: 'white',
+                  }
+                },
+              }}
+            />
+          </div>
+        </div>
       </div>
     </main>
   );

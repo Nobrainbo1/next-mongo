@@ -48,81 +48,103 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-row gap-4">
-      <div className="flex-1 w-64 ">
-        <form onSubmit={handleSubmit(createProduct)}>
-          <div className="grid grid-cols-2 gap-4 m-4 w-1/2">
-            <div>Code:</div>
-            <div>
-              <input
-                name="code"
-                type="text"
-                {...register("code", { required: true })}
-                className="border border-black w-full"
-              />
+    <div className="min-h-screen bg-gray-950 p-4">
+      <div className="flex flex-row gap-6 max-w-7xl mx-auto">
+        <div className="flex-1 bg-gray-900 rounded-lg shadow-2xl p-6 border border-gray-800">
+          <h2 className="text-2xl font-bold text-white mb-6">Add Product</h2>
+          <form onSubmit={handleSubmit(createProduct)}>
+            <div className="grid grid-cols-2 gap-4 max-w-lg">
+              <div className="text-gray-300 font-medium">Code:</div>
+              <div>
+                <input
+                  name="code"
+                  type="text"
+                  {...register("code", { required: true })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white placeholder-gray-400"
+                />
+              </div>
+              <div className="text-gray-300 font-medium">Name:</div>
+              <div>
+                <input
+                  name="name"
+                  type="text"
+                  {...register("name", { required: true })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white placeholder-gray-400"
+                />
+              </div>
+              <div className="text-gray-300 font-medium">Description:</div>
+              <div>
+                <textarea
+                  name="description"
+                  {...register("description", { required: true })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white placeholder-gray-400"
+                  rows="3"
+                />
+              </div>
+              <div className="text-gray-300 font-medium">Price:</div>
+              <div>
+                <input
+                  name="price"
+                  type="number"
+                  {...register("price", { required: true })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white placeholder-gray-400"
+                  step="0.01"
+                />
+              </div>
+              <div className="text-gray-300 font-medium">Category:</div>
+              <div>
+                <select
+                  name="category"
+                  {...register("category", { required: true })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white"
+                >
+                  <option value="">Select a category</option>
+                  {category.map((c) => (
+                    <option key={c._id} value={c._id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="col-span-2 mt-4">
+                <input
+                  type="submit"
+                  value="Add Product"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-6 rounded-lg transition-colors cursor-pointer"
+                />
+              </div>
             </div>
-            <div>Name:</div>
-            <div>
-              <input
-                name="name"
-                type="text"
-                {...register("name", { required: true })}
-                className="border border-black w-full"
-              />
-            </div>
-            <div>Description:</div>
-            <div>
-              <textarea
-                name="description"
-                {...register("description", { required: true })}
-                className="border border-black w-full"
-              />
-            </div>
-            <div>Price:</div>
-            <div>
-              <input
-                name="name"
-                type="number"
-                {...register("price", { required: true })}
-                className="border border-black w-full"
-              />
-            </div>
-            <div>Category:</div>
-            <div>
-              <select
-                name="category"
-                {...register("category", { required: true })}
-                className="border border-black w-full"
-              >
-                {category.map((c) => (
-                  <option key={c._id} value={c._id}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="col-span-2">
-              <input
-                type="submit"
-                value="Add"
-                className="bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-              />
-            </div>
+          </form>
+        </div>
+        
+        <div className="flex-1 bg-gray-900 rounded-lg shadow-2xl p-6 border border-gray-800">
+          <h2 className="text-2xl font-bold text-white mb-6">Products ({products.length})</h2>
+          <div className="space-y-3 max-h-96 overflow-y-auto">
+            {products.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <p>No products yet. Add your first product!</p>
+              </div>
+            ) : (
+              products.map((p) => (
+                <div key={p._id} className="bg-gray-800 rounded-lg p-4 hover:bg-gray-700 transition-colors border border-gray-700">
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <Link href={`/product/${p._id}`} className="font-semibold text-blue-400 hover:text-blue-300 text-lg">
+                        {p.name}
+                      </Link>
+                      <p className="text-gray-300 text-sm mt-1">{p.description}</p>
+                    </div>
+                    <button 
+                      onClick={deleteById(p._id)}
+                      className="bg-red-600 hover:bg-red-700 text-white p-2 rounded-lg transition-colors ml-4"
+                      title="Delete product"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
-        </form>
-      </div>
-      <div className="border m-4 bg-slate-300 flex-1 w-64">
-        <h1 className="text-2xl">Products ({products.length})</h1>
-        <ul className="list-disc ml-8">
-          {
-            products.map((p) => (
-              <li key={p._id}>
-                <button className="border border-black p-1/2" onClick={deleteById(p._id)}>❌</button>{' '}
-                <Link href={`/product/${p._id}`} className="font-bold">
-                  {p.name}
-                </Link>{" "}
-                - {p.description}
-              </li>
-            ))}
-        </ul>
+        </div>
       </div>
     </div>
   );

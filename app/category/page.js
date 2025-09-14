@@ -24,7 +24,6 @@ export default function Home() {
   ]
 
   const API_BASE = process.env.NEXT_PUBLIC_API_URL;
-  console.log(process.env.NEXT_PUBLIC_API_URL)
 
   const [categoryList, setCategoryList] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -98,75 +97,197 @@ export default function Home() {
   }
 
   return (
-    <main>
-      <form onSubmit={handleSubmit(handleCategoryFormSubmit)}>
-        <div className="grid grid-cols-2 gap-4 w-fit m-4 border border-gray-800 p-2">
-          <div>Category name:</div>
-          <div>
-            <input
-              name="name"
-              type="text"
-              {...register("name", { required: true })}
-              className="border border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            />
-          </div>
+    <main className="min-h-screen bg-gray-950 p-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="bg-gray-900 rounded-lg shadow-2xl p-6 border border-gray-800 mb-6">
+          <h1 className="text-2xl font-bold text-white mb-6">Add Category</h1>
 
-          <div>Order:</div>
-          <div>
-            <input
-              name="order"
-              type="number"
-              {...register("order", { required: true })}
-              className="border border-gray-600 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
-            />
-          </div>
-
-          <div className="col-span-2 text-right">
-            {editMode ?
-              <>
+          <form onSubmit={handleSubmit(handleCategoryFormSubmit)}>
+            <div className="grid grid-cols-2 gap-4 max-w-md">
+              <div className="text-gray-300 font-medium">Category name:</div>
+              <div>
                 <input
-                  type="submit"
-                  className="italic bg-blue-800 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
-                  value="Update" />
+                  name="name"
+                  type="text"
+                  {...register("name", { required: true })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white placeholder-gray-400"
+                />
+              </div>
 
-                {' '}
-                <button
-                  onClick={() => stopEditMode()}
-                  className=" italic bg-gray-800 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-full"
-                >Cancel
-                </button>
-              </>
-              :
-              <input
-                type="submit"
-                value="Add"
-                className="w-20 italic bg-green-800 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-full"
-              />
-            }
+              <div className="text-gray-300 font-medium">Order:</div>
+              <div>
+                <input
+                  name="order"
+                  type="number"
+                  {...register("order", { required: true })}
+                  className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-white placeholder-gray-400"
+                />
+              </div>
+
+              <div className="col-span-2 text-right mt-4">
+                {editMode ?
+                  <>
+                    <input
+                      type="submit"
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors cursor-pointer mr-2"
+                      value="Update" />
+                    <button
+                      onClick={() => stopEditMode()}
+                      className="bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-6 rounded-lg transition-colors"
+                    >Cancel
+                    </button>
+                  </>
+                  :
+                  <input
+                    type="submit"
+                    value="Add"
+                    className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg transition-colors cursor-pointer"
+                  />
+                }
+              </div>
+            </div>
+          </form>
+        </div>
+
+        <div className="bg-gray-900 rounded-lg shadow-2xl p-6 border border-gray-800">
+          <h2 className="text-xl font-bold text-white mb-4">Categories</h2>
+          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+            <DataGrid
+              rows={categoryList}
+              columns={columns}
+              disableColumnFilter
+              disableColumnMenu
+              disableColumnSelector
+              disableRowSelectionOnClick
+              disableDensitySelector
+              disableVirtualization={false}
+              hideFooterSelectedRowCount
+              autoHeight
+              sx={{
+                border: 0,
+                color: 'white',
+                width: '100%',
+                height: 'auto',
+                maxHeight: 600,
+                backgroundColor: '#1f2937',
+                '& .MuiDataGrid-root': {
+                  backgroundColor: '#1f2937',
+                  border: 'none',
+                },
+                '& .MuiDataGrid-main': {
+                  backgroundColor: '#1f2937',
+                },
+                '& .MuiDataGrid-container--top [role=row]': {
+                  backgroundColor: '#374151',
+                },
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: '#374151',
+                  color: 'white',
+                  fontWeight: 700,
+                  borderBottom: '1px solid #4b5563',
+                  '& .MuiDataGrid-columnHeader': {
+                    backgroundColor: '#374151',
+                  },
+                  '& .MuiDataGrid-columnHeaderTitle': {
+                    color: 'white',
+                    fontWeight: 600,
+                  },
+                },
+                '& .MuiDataGrid-virtualScroller': {
+                  backgroundColor: '#1f2937',
+                },
+                '& .MuiDataGrid-row': {
+                  backgroundColor: '#1f2937',
+                  borderBottom: '1px solid #374151',
+                  '&:hover': {
+                    backgroundColor: '#374151',
+                  },
+                  '&.Mui-selected': {
+                    backgroundColor: '#374151',
+                    '&:hover': {
+                      backgroundColor: '#4b5563',
+                    },
+                  },
+                },
+                '& .MuiDataGrid-cell': {
+                  color: 'white',
+                  borderBottom: '1px solid #374151',
+                  borderRight: 'none',
+                },
+                '& .MuiDataGrid-footerContainer': {
+                  backgroundColor: '#374151',
+                  color: 'white',
+                  borderTop: '1px solid #4b5563',
+                  '& .MuiTablePagination-root': {
+                    color: 'white',
+                  },
+                  '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
+                    color: 'white',
+                  },
+                  '& .MuiSelect-select': {
+                    color: 'white',
+                  },
+                  '& .MuiIconButton-root': {
+                    color: 'white',
+                  },
+                },
+                '& .MuiDataGrid-overlay': {
+                  backgroundColor: '#1f2937',
+                  color: 'white',
+                },
+                '& .MuiDataGrid-columnSeparator': {
+                  display: 'none',
+                },
+                '& .MuiDataGrid-menuIconButton': {
+                  color: 'white',
+                },
+                '& .MuiDataGrid-sortIcon': {
+                  color: 'white',
+                },
+                '& .MuiDataGrid-filterIcon': {
+                  display: 'none',
+                },
+                '& .MuiDataGrid-menuIcon': {
+                  display: 'none',
+                },
+                '& .MuiDataGrid-columnHeaderTitleContainer': {
+                  '& .MuiDataGrid-menuIconButton': {
+                    display: 'none',
+                  },
+                },
+                '& .MuiDataGrid-panel': {
+                  backgroundColor: '#374151',
+                  color: 'white',
+                },
+                '& .MuiDataGrid-panelHeader': {
+                  backgroundColor: '#374151',
+                  color: 'white',
+                },
+                '& .MuiDataGrid-panelContent': {
+                  backgroundColor: '#1f2937',
+                  color: 'white',
+                },
+                '& .MuiDataGrid-filterForm': {
+                  backgroundColor: '#1f2937',
+                  color: 'white',
+                },
+                '& .MuiDataGrid-toolbarContainer': {
+                  display: 'none',
+                },
+                '& .MuiDataGrid-columnHeadersInner': {
+                  backgroundColor: '#374151',
+                },
+                '& .MuiDataGrid-withBorderColor': {
+                  borderColor: '#374151',
+                },
+                '& .MuiDataGrid-selectedRowCount': {
+                  display: 'none',
+                },
+              }}
+            />
           </div>
         </div>
-      </form>
-
-      <div className="mx-4">
-        <DataGrid
-          rows={categoryList}
-          columns={columns}
-        />
       </div>
-
-      {/* <div className="ml-4">
-        <h1 className="text-xl font-bold">Category ({categoryList.length})</h1>
-        {categoryList.map((category) => (
-          <div key={category._id} className="ml-4">
-            ‣
-            <button onClick={() => startEditMode(category)} className="mr-2">📝</button>
-            <button onClick={() => deleteCategory(category)} className="mr-2">🗑️</button>
-            <Link href={`/product/category/${category._id}`} className="text-red-600">
-              {category.name} → {category.order}
-            </Link>
-          </div>
-        ))}
-      </div> */}
     </main>
   );
 }

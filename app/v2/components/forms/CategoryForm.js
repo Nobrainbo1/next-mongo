@@ -12,7 +12,7 @@ const style = {
   left: '50%',
   transform: 'translate(-50%, -50%)',
   width: 450,
-  bgcolor: 'background.paper',
+  bgcolor: '#1f2937',
   border: '2px solid #374151',
   borderRadius: 2,
   boxShadow: 24,
@@ -88,7 +88,7 @@ export default function CategoryForm({
                   message: "Category name must be at least 2 characters"
                 }
               })}
-              className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              className="border border-gray-600 bg-gray-800 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400"
               placeholder="Enter category name"
             />
             {errors.name && (
@@ -110,7 +110,7 @@ export default function CategoryForm({
                 },
                 valueAsNumber: true
               })}
-              className="border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+              className="border border-gray-600 bg-gray-800 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400"
               placeholder="Enter sort order (0, 1, 2, ...)"
             />
             {errors.order && (

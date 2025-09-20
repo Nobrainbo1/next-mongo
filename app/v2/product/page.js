@@ -223,7 +223,7 @@ export default function Home() {
                   <ShoppingCartIcon />
                 </Avatar>
                 <div>
-                  <h2 className="text-2xl font-bold text-white">Products</h2>
+                  <h2 className="text-2xl font-bold text-slate-200">Products</h2>
                   <span className="text-sm text-gray-400">({products.length} total)</span>
                 </div>
               </div>
@@ -263,6 +263,7 @@ export default function Home() {
                 }}
                 rows={products}
                 columns={columns}
+                autoHeight
                 initialState={{
                   pagination: {
                     paginationModel: { page: 0, pageSize: 10 },
@@ -271,16 +272,27 @@ export default function Home() {
                 pageSizeOptions={[5, 10, 20]}
                 sx={{
                   border: 0,
-                  color: 'white',
-                  minHeight: 500,
+                  color: '#e2e8f0',
                   '& .MuiDataGrid-root': {
                     backgroundColor: '#1f2937',
                   },
-                  '& .MuiDataGrid-columnHeaders': {
+                  '& .MuiDataGrid-topContainer': {
                     backgroundColor: '#374151',
-                    color: 'white',
+                    borderBottom: '1px solid #4b5563',
+                  },
+                  '& .MuiDataGrid-columnHeaders': {
+                    backgroundColor: '#374151 !important',
+                    color: '#e2e8f0',
                     fontWeight: 700,
                     borderBottom: '1px solid #4b5563',
+                  },
+                  '& .MuiDataGrid-columnHeader': {
+                    backgroundColor: '#374151 !important',
+                    color: '#e2e8f0 !important',
+                  },
+                  '& .MuiDataGrid-columnHeaderTitle': {
+                    color: '#e2e8f0 !important',
+                    fontWeight: 700,
                   },
                   '& .MuiDataGrid-row': {
                     backgroundColor: '#1f2937',
@@ -290,15 +302,15 @@ export default function Home() {
                     },
                   },
                   '& .MuiDataGrid-cell': {
-                    color: 'white',
+                    color: '#e2e8f0',
                     borderBottom: '1px solid #374151',
                   },
                   '& .MuiDataGrid-toolbarContainer': {
                     backgroundColor: '#374151',
-                    color: 'white',
+                    color: '#e2e8f0',
                     borderBottom: '1px solid #4b5563',
                     '& .MuiButton-root': {
-                      color: 'white',
+                      color: '#e2e8f0',
                       '&:hover': {
                         backgroundColor: '#4b5563',
                       }
@@ -306,10 +318,10 @@ export default function Home() {
                   },
                   '& .MuiDataGrid-footerContainer': {
                     backgroundColor: '#374151',
-                    color: 'white',
+                    color: '#e2e8f0',
                     borderTop: '1px solid #4b5563',
                     '& .MuiTablePagination-root': {
-                      color: 'white',
+                      color: '#e2e8f0',
                     }
                   },
                 }}

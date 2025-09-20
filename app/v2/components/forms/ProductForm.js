@@ -269,6 +269,27 @@ export default function ProductForm({
               })}
               error={!!errors.category}
               helperText={errors.category?.message}
+              SelectProps={{
+                MenuProps: {
+                  PaperProps: {
+                    sx: {
+                      bgcolor: '#334155',
+                      '& .MuiMenuItem-root': {
+                        color: '#94a3b8',
+                        '&:hover': {
+                          bgcolor: '#475569',
+                        },
+                        '&.Mui-selected': {
+                          bgcolor: '#3b82f6',
+                          '&:hover': {
+                            bgcolor: '#2563eb',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              }}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   bgcolor: '#334155',
@@ -283,9 +304,9 @@ export default function ProductForm({
                 '& .MuiSelect-icon': { color: '#94a3b8' }
               }}
             >
-              <MenuItem value="">Select a category</MenuItem>
+              <MenuItem value="" sx={{ color: '#94a3b8', bgcolor: '#334155' }}>Select a category</MenuItem>
               {categories.map((category) => (
-                <MenuItem key={category._id} value={category._id}>
+                <MenuItem key={category._id} value={category._id} sx={{ color: '#94a3b8', bgcolor: '#334155', '&:hover': { bgcolor: '#475569' } }}>
                   {category.name}
                 </MenuItem>
               ))}

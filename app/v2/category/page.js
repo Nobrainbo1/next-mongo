@@ -11,6 +11,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import Button from "@mui/material/Button";
 import { GridActionsCellItem } from "@mui/x-data-grid";
+import ResponsiveAppBar from "../components/ResponsiveAppBar";
 
 export default function Home() {
   const [category, setCategory] = useState([]);
@@ -166,6 +167,7 @@ export default function Home() {
 
   return (
     <main>
+      <ResponsiveAppBar />
       {/* <form onSubmit={handleSubmit(createCategory)}>
         <div className="grid grid-cols-2 gap-4 w-fit m-4">
           <div>Category:</div>
@@ -222,7 +224,7 @@ export default function Home() {
                 <WorkIcon />
               </Avatar>
               <div>
-                <h2 className="text-2xl font-bold text-white">Categories</h2>
+                <h2 className="text-2xl font-bold text-slate-200">Categories</h2>
                 <span className="text-sm text-gray-400">({category.length} total)</span>
               </div>
             </div>
@@ -262,18 +264,38 @@ export default function Home() {
               }}
               rows={category}
               columns={columns}
+              autoHeight
               sx={{
                 border: 0,
-                color: 'white',
-                minHeight: 400,
+                color: '#e2e8f0',
                 '& .MuiDataGrid-root': {
                   backgroundColor: '#1f2937',
                 },
-                '& .MuiDataGrid-columnHeaders': {
+                '& .MuiDataGrid-topContainer': {
                   backgroundColor: '#374151',
-                  color: 'white',
+                  borderBottom: '1px solid #4b5563',
+                },
+                '& .MuiDataGrid-columnHeaders': {
+                  backgroundColor: '#374151 !important',
+                  color: '#e2e8f0',
                   fontWeight: 700,
                   borderBottom: '1px solid #4b5563',
+                },
+                '& .MuiDataGrid-columnHeader': {
+                  backgroundColor: '#374151 !important',
+                  color: '#e2e8f0 !important',
+                },
+                '& .MuiDataGrid-columnHeaderTitle': {
+                  color: '#e2e8f0 !important',
+                  fontWeight: 700,
+                },
+                '& .MuiDataGrid-columnHeaderRow': {
+                  backgroundColor: '#374151',
+                  color: '#e2e8f0',
+                },
+                '& .MuiDataGrid-row--borderBottom': {
+                  backgroundColor: '#1f2937',
+                  borderBottom: '1px solid #374151',
                 },
                 '& .MuiDataGrid-row': {
                   backgroundColor: '#1f2937',
@@ -283,15 +305,15 @@ export default function Home() {
                   },
                 },
                 '& .MuiDataGrid-cell': {
-                  color: 'white',
+                  color: '#e2e8f0',
                   borderBottom: '1px solid #374151',
                 },
                 '& .MuiDataGrid-toolbarContainer': {
                   backgroundColor: '#374151',
-                  color: 'white',
+                  color: '#e2e8f0',
                   borderBottom: '1px solid #4b5563',
                   '& .MuiButton-root': {
-                    color: 'white',
+                    color: '#e2e8f0',
                     '&:hover': {
                       backgroundColor: '#4b5563',
                     }
@@ -299,10 +321,10 @@ export default function Home() {
                 },
                 '& .MuiDataGrid-footerContainer': {
                   backgroundColor: '#374151',
-                  color: 'white',
+                  color: '#e2e8f0',
                   borderTop: '1px solid #4b5563',
                   '& .MuiTablePagination-root': {
-                    color: 'white',
+                    color: '#e2e8f0',
                   }
                 },
               }}

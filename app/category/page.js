@@ -2,24 +2,48 @@
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import Link from "next/link";
-import { DataGrid } from "@mui/x-data-grid";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import { GridActionsCellItem } from "@mui/x-data-grid";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function Home() {
 
   const columns = [
-    // { field: 'id', headerName: 'ID', width: 90 },
-    { field: 'name', headerName: 'Name', width: 150 },
-    { field: 'order', headerName: 'Order', width: 150 },
+    { field: "name", headerName: "Category Name", width: 200 },
+    { 
+      field: "order", 
+      headerName: "Order", 
+      width: 100,
+      type: 'number',
+      align: 'center',
+      headerAlign: 'center'
+    },
     {
-      field: 'Action', headerName: 'Action', width: 150,
-      renderCell: (params) => {
-        return (
-          <div>
-            <button onClick={() => startEditMode(params.row)}>📝</button>
-            <button onClick={() => deleteCategory(params.row)}>🗑️</button>
-          </div>
-        )
-      }
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      cellClassName: 'actions',
+      getActions: ({ id, row }) => {
+        return [
+          <GridActionsCellItem
+            key="edit"
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={() => startEditMode(row)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="delete"
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => deleteCategory(row)}
+            color="inherit"
+          />,
+        ];
+      },
     },
   ]
 
@@ -150,51 +174,39 @@ export default function Home() {
         </div>
 
         <div className="bg-gray-900 rounded-lg shadow-2xl p-6 border border-gray-800">
-          <h2 className="text-xl font-bold text-white mb-4">Categories</h2>
-          <div className="bg-gray-800 rounded-lg border border-gray-700 overflow-hidden">
+          <h2 className="text-xl font-bold text-white mb-4">Categories ({categoryList.length})</h2>
+          <div style={{ height: 400, width: '100%' }}>
             <DataGrid
               rows={categoryList}
               columns={columns}
-              disableColumnFilter
-              disableColumnMenu
-              disableColumnSelector
-              disableRowSelectionOnClick
-              disableDensitySelector
-              disableVirtualization={false}
-              hideFooterSelectedRowCount
               autoHeight
+              slots={{ toolbar: GridToolbar }}
               sx={{
-                border: 0,
-                color: 'white',
-                width: '100%',
-                height: 'auto',
-                maxHeight: 600,
-                backgroundColor: '#1f2937',
-                '& .MuiDataGrid-root': {
-                  backgroundColor: '#1f2937',
-                  border: 'none',
-                },
+                border: 'none',
                 '& .MuiDataGrid-main': {
                   backgroundColor: '#1f2937',
                 },
-                '& .MuiDataGrid-container--top [role=row]': {
-                  backgroundColor: '#374151',
-                },
                 '& .MuiDataGrid-columnHeaders': {
                   backgroundColor: '#374151',
-                  color: 'white',
+                  color: '#e2e8f0',
                   fontWeight: 700,
                   borderBottom: '1px solid #4b5563',
-                  '& .MuiDataGrid-columnHeader': {
-                    backgroundColor: '#374151',
-                  },
-                  '& .MuiDataGrid-columnHeaderTitle': {
-                    color: 'white',
-                    fontWeight: 600,
-                  },
                 },
-                '& .MuiDataGrid-virtualScroller': {
+                '& .MuiDataGrid-columnHeader': {
+                  backgroundColor: '#374151 !important',
+                  color: '#e2e8f0 !important',
+                },
+                '& .MuiDataGrid-columnHeaderTitle': {
+                  color: '#e2e8f0 !important',
+                  fontWeight: 700,
+                },
+                '& .MuiDataGrid-columnHeaderRow': {
+                  backgroundColor: '#374151',
+                  color: '#e2e8f0',
+                },
+                '& .MuiDataGrid-row--borderBottom': {
                   backgroundColor: '#1f2937',
+                  borderBottom: '1px solid #374151',
                 },
                 '& .MuiDataGrid-row': {
                   backgroundColor: '#1f2937',
@@ -202,86 +214,29 @@ export default function Home() {
                   '&:hover': {
                     backgroundColor: '#374151',
                   },
-                  '&.Mui-selected': {
-                    backgroundColor: '#374151',
-                    '&:hover': {
-                      backgroundColor: '#4b5563',
-                    },
-                  },
                 },
                 '& .MuiDataGrid-cell': {
-                  color: 'white',
+                  color: '#e2e8f0',
                   borderBottom: '1px solid #374151',
-                  borderRight: 'none',
+                },
+                '& .MuiDataGrid-toolbarContainer': {
+                  backgroundColor: '#374151',
+                  color: '#e2e8f0',
+                  borderBottom: '1px solid #4b5563',
+                  '& .MuiButton-root': {
+                    color: '#e2e8f0',
+                    '&:hover': {
+                      backgroundColor: '#4b5563',
+                    }
+                  },
                 },
                 '& .MuiDataGrid-footerContainer': {
                   backgroundColor: '#374151',
-                  color: 'white',
+                  color: '#e2e8f0',
                   borderTop: '1px solid #4b5563',
                   '& .MuiTablePagination-root': {
-                    color: 'white',
-                  },
-                  '& .MuiTablePagination-selectLabel, & .MuiTablePagination-displayedRows': {
-                    color: 'white',
-                  },
-                  '& .MuiSelect-select': {
-                    color: 'white',
-                  },
-                  '& .MuiIconButton-root': {
-                    color: 'white',
-                  },
-                },
-                '& .MuiDataGrid-overlay': {
-                  backgroundColor: '#1f2937',
-                  color: 'white',
-                },
-                '& .MuiDataGrid-columnSeparator': {
-                  display: 'none',
-                },
-                '& .MuiDataGrid-menuIconButton': {
-                  color: 'white',
-                },
-                '& .MuiDataGrid-sortIcon': {
-                  color: 'white',
-                },
-                '& .MuiDataGrid-filterIcon': {
-                  display: 'none',
-                },
-                '& .MuiDataGrid-menuIcon': {
-                  display: 'none',
-                },
-                '& .MuiDataGrid-columnHeaderTitleContainer': {
-                  '& .MuiDataGrid-menuIconButton': {
-                    display: 'none',
-                  },
-                },
-                '& .MuiDataGrid-panel': {
-                  backgroundColor: '#374151',
-                  color: 'white',
-                },
-                '& .MuiDataGrid-panelHeader': {
-                  backgroundColor: '#374151',
-                  color: 'white',
-                },
-                '& .MuiDataGrid-panelContent': {
-                  backgroundColor: '#1f2937',
-                  color: 'white',
-                },
-                '& .MuiDataGrid-filterForm': {
-                  backgroundColor: '#1f2937',
-                  color: 'white',
-                },
-                '& .MuiDataGrid-toolbarContainer': {
-                  display: 'none',
-                },
-                '& .MuiDataGrid-columnHeadersInner': {
-                  backgroundColor: '#374151',
-                },
-                '& .MuiDataGrid-withBorderColor': {
-                  borderColor: '#374151',
-                },
-                '& .MuiDataGrid-selectedRowCount': {
-                  display: 'none',
+                    color: '#e2e8f0',
+                  }
                 },
               }}
             />

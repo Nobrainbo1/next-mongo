@@ -1,277 +1,323 @@
 "use client";
-import Link from "next/link";
-import { useForm } from "react-hook-form";
-import { useEffect, useState } from "react";
-import ResponsiveAppBar from "../components/ResponsiveAppBar";
-import { Paper, Typography, TextField, Button, Box, Card, CardContent, Chip, IconButton, Grid, MenuItem } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
+import { useState, useEffect } from "react";
+import ProductForm from "@/app/v2/components/forms/ProductForm";
+import { DataGrid, GridToolbar } from "@mui/x-data-grid";
+import Modal from "@mui/material/Modal";
+import Avatar from "@mui/material/Avatar";
+import ShoppingCartIcon from "@mui/icons-material/ShoppingCart";
+import IconButton from "@mui/material/IconButton";
+import AddBoxIcon from "@mui/icons-material/AddBox";
 import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Button from "@mui/material/Button";
+import { GridActionsCellItem } from "@mui/x-data-grid";
+import ResponsiveAppBar from "../components/ResponsiveAppBar";
+import Chip from "@mui/material/Chip";
 
 export default function Home() {
-  const APIBASE = process.env.NEXT_PUBLIC_API_URL;
-  const { register, handleSubmit } = useForm();
   const [products, setProducts] = useState([]);
-  const [category, setCategory] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  
+  const columns = [
+    { field: "code", headerName: "Product Code", width: 120 },
+    { field: "name", headerName: "Product Name", width: 200 },
+    { 
+      field: "description", 
+      headerName: "Description", 
+      width: 250,
+      renderCell: (params) => (
+        <div style={{ 
+          whiteSpace: 'nowrap', 
+          overflow: 'hidden', 
+          textOverflow: 'ellipsis',
+          maxWidth: '100%'
+        }}>
+          {params.value}
+        </div>
+      )
+    },
+    { 
+      field: "price", 
+      headerName: "Price", 
+      width: 100,
+      type: 'number',
+      align: 'center',
+      headerAlign: 'center',
+      renderCell: (params) => (
+        <Chip 
+          label={`$${params.value}`} 
+          size="small" 
+          sx={{ 
+            bgcolor: '#3b82f6', 
+            color: 'white',
+            fontWeight: 600
+          }} 
+        />
+      )
+    },
+    { 
+      field: "category", 
+      headerName: "Category", 
+      width: 150,
+      renderCell: (params) => (
+        <Chip 
+          label={params.value?.name || 'No Category'} 
+          size="small" 
+          variant="outlined"
+          sx={{ 
+            color: 'white',
+            borderColor: '#64748b'
+          }} 
+        />
+      )
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      cellClassName: 'actions',
+      getActions: ({ id, row }) => {
+        return [
+          <GridActionsCellItem
+            key="edit"
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={() => handleEdit(row)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="delete"
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDelete(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
+  ];
 
-  const startEdit = (id) => async () => {
-    // TODO
-  }
-
+  const APIBASE = process.env.NEXT_PUBLIC_API_URL;
+  
   async function fetchProducts() {
     const data = await fetch(`${APIBASE}/product`);
     const p = await data.json();
-    setProducts(p);
+    const p2 = p.map((product) => {
+      product.id = product._id;
+      return product;
+    });
+    setProducts(p2);
   }
 
-  async function fetchCategory() {
-    const data = await fetch(`${APIBASE}/category`);
-    const c = await data.json();
-    setCategory(c);
-  }
-
-  const createProduct = (data) => {
-    fetch(`${APIBASE}/product`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }).then(() => fetchProducts());
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => {
+    setEditMode(false);
+    setSelectedProduct(null);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setEditMode(false);
+    setSelectedProduct(null);
   };
 
-  const deleteById = (id) => async () => {
-    if (!confirm("Are you sure?")) return;
+  // Handle Edit - fetch product data by ID and open form in edit mode
+  async function handleEdit(productRow) {
+    try {
+      const response = await fetch(`${APIBASE}/product/${productRow._id}`);
+      if (response.ok) {
+        const productData = await response.json();
+        setSelectedProduct(productData);
+        setEditMode(true);
+        setOpen(true);
+      } else {
+        console.error('Failed to fetch product data');
+        alert('Failed to load product data for editing');
+      }
+    } catch (error) {
+      console.error('Error fetching product:', error);
+      alert('Error loading product data');
+    }
+  }
 
-    await fetch(`${APIBASE}/product/${id}`, {
-      method: "DELETE",
-    });
-    fetchProducts();
+  // Handle Delete
+  async function handleDelete(productId) {
+    if (window.confirm('Are you sure you want to delete this product?')) {
+      try {
+        const response = await fetch(`${APIBASE}/product/${productId}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          fetchProducts(); // Refresh the list
+        } else {
+          alert('Failed to delete product');
+        }
+      } catch (error) {
+        console.error('Error deleting product:', error);
+        alert('Error deleting product');
+      }
+    }
+  }
+
+  async function handleProductFormSubmit(data) {
+    try {
+      let response;
+      
+      if (editMode) {
+        // UPDATE operation - PUT request
+        response = await fetch(`${APIBASE}/product`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+      } else {
+        // CREATE operation - POST request
+        response = await fetch(`${APIBASE}/product`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+      }
+
+      if (response.ok) {
+        // Success - refresh the product list and close modal
+        await fetchProducts();
+        handleClose();
+        
+        // Show success message
+        const action = editMode ? 'updated' : 'created';
+        alert(`Product ${action} successfully!`);
+      } else {
+        // Handle API errors
+        const errorData = await response.text();
+        console.error(`Failed to ${editMode ? 'update' : 'create'} product:`, errorData);
+        alert(`Failed to ${editMode ? 'update' : 'create'} product. Please try again.`);
+      }
+    } catch (error) {
+      // Handle network or other errors
+      console.error('Error submitting product form:', error);
+      alert('An error occurred. Please check your connection and try again.');
+    }
   }
 
   useEffect(() => {
-    fetchCategory();
     fetchProducts();
   }, []);
 
   return (
     <>
       <ResponsiveAppBar />
-      <Box sx={{ minHeight: '100vh', bgcolor: '#0f172a', p: 3 }}>
-        <Grid container spacing={4} maxWidth="xl" sx={{ mx: 'auto' }}>
-          {/* Add Product Form */}
-          <Grid item xs={12} md={6}>
-            <Paper elevation={8} sx={{ bgcolor: '#1e293b', border: '1px solid #334155', borderRadius: 2, p: 3 }}>
-              <Typography variant="h5" sx={{ color: 'white', mb: 3, display: 'flex', alignItems: 'center', fontWeight: 600 }}>
-                ➕ Add New Product
-              </Typography>
-              
-              <Box component="form" onSubmit={handleSubmit(createProduct)}>
-                <Grid container spacing={3}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Code"
-                      variant="outlined"
-                      {...register("code", { required: true })}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: '#334155',
-                          color: 'white',
-                          '& fieldset': { borderColor: '#475569' },
-                          '&:hover fieldset': { borderColor: '#3b82f6' },
-                          '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#94a3b8' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3b82f6' }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Name"
-                      variant="outlined"
-                      {...register("name", { required: true })}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: '#334155',
-                          color: 'white',
-                          '& fieldset': { borderColor: '#475569' },
-                          '&:hover fieldset': { borderColor: '#3b82f6' },
-                          '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#94a3b8' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3b82f6' }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12}>
-                    <TextField
-                      fullWidth
-                      label="Description"
-                      variant="outlined"
-                      multiline
-                      rows={3}
-                      {...register("description", { required: true })}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: '#334155',
-                          color: 'white',
-                          '& fieldset': { borderColor: '#475569' },
-                          '&:hover fieldset': { borderColor: '#3b82f6' },
-                          '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#94a3b8' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3b82f6' }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      label="Price"
-                      variant="outlined"
-                      type="number"
-                      inputProps={{ step: "0.01" }}
-                      {...register("price", { required: true })}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: '#334155',
-                          color: 'white',
-                          '& fieldset': { borderColor: '#475569' },
-                          '&:hover fieldset': { borderColor: '#3b82f6' },
-                          '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#94a3b8' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3b82f6' }
-                      }}
-                    />
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      fullWidth
-                      select
-                      label="Category"
-                      variant="outlined"
-                      {...register("category", { required: true })}
-                      sx={{
-                        '& .MuiOutlinedInput-root': {
-                          bgcolor: '#334155',
-                          color: 'white',
-                          '& fieldset': { borderColor: '#475569' },
-                          '&:hover fieldset': { borderColor: '#3b82f6' },
-                          '&.Mui-focused fieldset': { borderColor: '#3b82f6' }
-                        },
-                        '& .MuiInputLabel-root': { color: '#94a3b8' },
-                        '& .MuiInputLabel-root.Mui-focused': { color: '#3b82f6' }
-                      }}
-                    >
-                      <MenuItem value="">Select a category</MenuItem>
-                      {category.map((c) => (
-                        <MenuItem key={c._id} value={c._id}>{c.name}</MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                  <Grid item xs={12}>
-                    <Button
-                      type="submit"
-                      fullWidth
-                      variant="contained"
-                      size="large"
-                      sx={{
-                        py: 1.5,
-                        background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                        boxShadow: '0 4px 20px rgba(59, 130, 246, 0.3)',
-                        '&:hover': {
-                          background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                          boxShadow: '0 6px 25px rgba(59, 130, 246, 0.4)'
-                        }
-                      }}
-                    >
-                      Add Product
-                    </Button>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Paper>
-          </Grid>
-          
-          {/* Products List */}
-          <Grid item xs={12} md={6}>
-            <Paper elevation={8} sx={{ bgcolor: '#1e293b', border: '1px solid #334155', borderRadius: 2, p: 3 }}>
-              <Typography variant="h5" sx={{ color: 'white', mb: 3, fontWeight: 600 }}>
-                📦 Products ({products.length})
-              </Typography>
-              
-              <Box sx={{ maxHeight: 500, overflow: 'auto' }}>
-                {products.length === 0 ? (
-                  <Box sx={{ textAlign: 'center', py: 6, color: '#64748b' }}>
-                    <Typography>No products yet. Add your first product!</Typography>
-                  </Box>
-                ) : (
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                    {products.map((p) => (
-                      <Card key={p._id} elevation={4} sx={{ bgcolor: '#334155', border: '1px solid #475569' }}>
-                        <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-                          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-                            <Box sx={{ flex: 1, mr: 2 }}>
-                              <Link href={`/product/${p._id}`} style={{ textDecoration: 'none' }}>
-                                <Typography variant="h6" sx={{ color: '#60a5fa', '&:hover': { color: '#3b82f6' }, cursor: 'pointer', fontWeight: 600 }}>
-                                  {p.name}
-                                </Typography>
-                              </Link>
-                              <Typography variant="body2" sx={{ color: '#cbd5e1', mt: 0.5 }}>
-                                {p.description}
-                              </Typography>
-                              <Box sx={{ mt: 1 }}>
-                                <Chip 
-                                  label={`$${p.price}`} 
-                                  size="small" 
-                                  sx={{ 
-                                    bgcolor: '#3b82f6', 
-                                    color: 'white',
-                                    fontWeight: 600
-                                  }} 
-                                />
-                              </Box>
-                            </Box>
-                            <Box sx={{ display: 'flex', gap: 1 }}>
-                              <IconButton 
-                                onClick={startEdit(p._id)}
-                                sx={{ 
-                                  bgcolor: '#f59e0b', 
-                                  color: 'white',
-                                  '&:hover': { bgcolor: '#d97706' },
-                                  width: 36, 
-                                  height: 36
-                                }}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                              <IconButton 
-                                onClick={deleteById(p._id)}
-                                sx={{ 
-                                  bgcolor: '#dc2626', 
-                                  color: 'white',
-                                  '&:hover': { bgcolor: '#b91c1c' },
-                                  width: 36, 
-                                  height: 36
-                                }}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Box>
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </Box>
-                )}
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-      </Box>
+      <main>
+        <div className="mx-4 p-6 bg-gray-950 min-h-screen">
+          <div className="bg-gray-900 rounded-lg shadow-2xl p-6 border border-gray-800">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <Avatar sx={{ bgcolor: '#3b82f6', color: 'white' }}>
+                  <ShoppingCartIcon />
+                </Avatar>
+                <div>
+                  <h2 className="text-2xl font-bold text-white">Products</h2>
+                  <span className="text-sm text-gray-400">({products.length} total)</span>
+                </div>
+              </div>
+              <IconButton 
+                aria-label="new-product" 
+                onClick={handleOpen}
+                sx={{ 
+                  bgcolor: '#3b82f6', 
+                  color: 'white', 
+                  '&:hover': { bgcolor: '#2563eb' },
+                  width: 48,
+                  height: 48
+                }}
+              >
+                <AddBoxIcon />
+              </IconButton>
+            </div>
+            
+            <Modal
+              open={open}
+              onClose={handleClose}
+              aria-labelledby="modal-modal-title"
+              aria-describedby="modal-modal-description"
+            >
+              <ProductForm 
+                onSubmit={handleProductFormSubmit}
+                isEditMode={editMode}
+                initialData={selectedProduct}
+                onCancel={handleClose}
+              />
+            </Modal>
+            
+            <div className="bg-gray-800 rounded-lg border border-gray-700">
+              <DataGrid
+                slots={{
+                  toolbar: GridToolbar,
+                }}
+                rows={products}
+                columns={columns}
+                initialState={{
+                  pagination: {
+                    paginationModel: { page: 0, pageSize: 10 },
+                  },
+                }}
+                pageSizeOptions={[5, 10, 20]}
+                sx={{
+                  border: 0,
+                  color: 'white',
+                  minHeight: 500,
+                  '& .MuiDataGrid-root': {
+                    backgroundColor: '#1f2937',
+                  },
+                  '& .MuiDataGrid-columnHeaders': {
+                    backgroundColor: '#374151',
+                    color: 'white',
+                    fontWeight: 700,
+                    borderBottom: '1px solid #4b5563',
+                  },
+                  '& .MuiDataGrid-row': {
+                    backgroundColor: '#1f2937',
+                    borderBottom: '1px solid #374151',
+                    '&:hover': {
+                      backgroundColor: '#374151',
+                    },
+                  },
+                  '& .MuiDataGrid-cell': {
+                    color: 'white',
+                    borderBottom: '1px solid #374151',
+                  },
+                  '& .MuiDataGrid-toolbarContainer': {
+                    backgroundColor: '#374151',
+                    color: 'white',
+                    borderBottom: '1px solid #4b5563',
+                    '& .MuiButton-root': {
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: '#4b5563',
+                      }
+                    },
+                  },
+                  '& .MuiDataGrid-footerContainer': {
+                    backgroundColor: '#374151',
+                    color: 'white',
+                    borderTop: '1px solid #4b5563',
+                    '& .MuiTablePagination-root': {
+                      color: 'white',
+                    }
+                  },
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </main>
     </>
   );
 }

@@ -7,12 +7,51 @@ import Avatar from "@mui/material/Avatar";
 import WorkIcon from "@mui/icons-material/Work";
 import IconButton from "@mui/material/IconButton";
 import AddBoxIcon from "@mui/icons-material/AddBox";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+import Button from "@mui/material/Button";
+import { GridActionsCellItem } from "@mui/x-data-grid";
 
 export default function Home() {
   const [category, setCategory] = useState([]);
+  const [editMode, setEditMode] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState(null);
   const columns = [
-    { field: "name", headerName: "Category Name", width: 150 },
-    // { field: 'col2', headerName: 'Column 2', width: 150 },
+    { field: "name", headerName: "Category Name", width: 200 },
+    { 
+      field: "order", 
+      headerName: "Order", 
+      width: 100,
+      type: 'number',
+      align: 'center',
+      headerAlign: 'center'
+    },
+    {
+      field: 'actions',
+      type: 'actions',
+      headerName: 'Actions',
+      width: 120,
+      cellClassName: 'actions',
+      getActions: ({ id, row }) => {
+        return [
+          <GridActionsCellItem
+            key="edit"
+            icon={<EditIcon />}
+            label="Edit"
+            className="textPrimary"
+            onClick={() => handleEdit(row)}
+            color="inherit"
+          />,
+          <GridActionsCellItem
+            key="delete"
+            icon={<DeleteIcon />}
+            label="Delete"
+            onClick={() => handleDelete(id)}
+            color="inherit"
+          />,
+        ];
+      },
+    },
   ];
 
   const APIBASE = process.env.NEXT_PUBLIC_API_URL;
@@ -27,38 +66,102 @@ export default function Home() {
   }
 
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const handleOpen = () => {
+    setEditMode(false);
+    setSelectedCategory(null);
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setOpen(false);
+    setEditMode(false);
+    setSelectedCategory(null);
+  };
+
+  // Handle Edit - fetch category data by ID and open form in edit mode
+  async function handleEdit(categoryRow) {
+    try {
+      const response = await fetch(`${APIBASE}/category/${categoryRow._id}`);
+      if (response.ok) {
+        const categoryData = await response.json();
+        setSelectedCategory(categoryData);
+        setEditMode(true);
+        setOpen(true);
+      } else {
+        console.error('Failed to fetch category data');
+        alert('Failed to load category data for editing');
+      }
+    } catch (error) {
+      console.error('Error fetching category:', error);
+      alert('Error loading category data');
+    }
+  }
+
+  // Handle Delete
+  async function handleDelete(categoryId) {
+    if (window.confirm('Are you sure you want to delete this category?')) {
+      try {
+        const response = await fetch(`${APIBASE}/category/${categoryId}`, {
+          method: 'DELETE'
+        });
+        if (response.ok) {
+          fetchCategory(); // Refresh the list
+        } else {
+          alert('Failed to delete category');
+        }
+      } catch (error) {
+        console.error('Error deleting category:', error);
+        alert('Error deleting category');
+      }
+    }
+  }
 
   useEffect(() => {
     fetchCategory();
   }, []);
 
-  function handleCategoryFormSubmit(data) {
-    if (editMode) {
-      // data.id = data._id
-      fetch(`${APIBASE}/category`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      }).then(() => {
-        reset({ name: '', order: '' })
-        fetchCategory()
-      });
-      return
+  async function handleCategoryFormSubmit(data) {
+    try {
+      let response;
+      
+      if (editMode) {
+        // UPDATE operation - PUT request
+        response = await fetch(`${APIBASE}/category`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+      } else {
+        // CREATE operation - POST request
+        response = await fetch(`${APIBASE}/category`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        });
+      }
+
+      if (response.ok) {
+        // Success - refresh the category list and close modal
+        await fetchCategory();
+        handleClose();
+        
+        // Show success message
+        const action = editMode ? 'updated' : 'created';
+        alert(`Category ${action} successfully!`);
+      } else {
+        // Handle API errors
+        const errorData = await response.text();
+        console.error(`Failed to ${editMode ? 'update' : 'create'} category:`, errorData);
+        alert(`Failed to ${editMode ? 'update' : 'create'} category. Please try again.`);
+      }
+    } catch (error) {
+      // Handle network or other errors
+      console.error('Error submitting category form:', error);
+      alert('An error occurred. Please check your connection and try again.');
     }
-    fetch(`${APIBASE}/category`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(data),
-    }).then(() => {
-      reset({ name: '', order: '' })
-      fetchCategory()
-    });
   }
 
   return (
@@ -144,7 +247,12 @@ export default function Home() {
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
           >
-            <CategoryForm onSubmit={handleCategoryFormSubmit} />
+            <CategoryForm 
+              onSubmit={handleCategoryFormSubmit}
+              isEditMode={editMode}
+              initialData={selectedCategory}
+              onCancel={handleClose}
+            />
           </Modal>
           
           <div className="bg-gray-800 rounded-lg border border-gray-700">
